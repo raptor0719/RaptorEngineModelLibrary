@@ -10,6 +10,9 @@ import java.util.Map.Entry;
 import raptor.modelLibrary.model.point.IPointReader;
 
 public class Model {
+	private final Map<Integer, Animation> animations;
+	private final List<Hardpoint> hardpoints;
+
 	private Image currentSprite;
 	private IPointReader position;
 	private int direction;
@@ -17,17 +20,25 @@ public class Model {
 	// Animation Timing Stuff
 	private final Map<Integer, List<Integer>> animationTimingMap;
 
+	private List<List<Frame>> currentFrames;
 	private List<Integer> currentTimings;
 	private int totalFramesRemaining = 0;
 	private int countRemainingForCurrentFrame = 0;
 	private int currentFrameIndex = 0;
 
 	public Model(final ModelData base, final IPointReader position, final int initialDirection) {
+		animations = base.getAnimations();
+		hardpoints = new ArrayList<>(base.getHardpointCount());
+
+		for (int i = 0; i < base.getHardpointCount(); i++)
+			hardpoints.add(new Hardpoint(0, 0, 0));
+
+		setHardpointPositions(base.getDefaultFrame(), hardpoints);
 		currentSprite = base.getDefaultFrame().getImage();
 		this.position = position;
 		direction = initialDirection;
 
-		animationTimingMap = buildTimingMap(base.getAnimations());
+		animationTimingMap = buildTimingMap(animations);
 	}
 
 	public Image getCurrentSprite() {
@@ -43,6 +54,7 @@ public class Model {
 	}
 
 	public int setAnimation(int id) {
+		currentFrames = animations.get(id).getFrames();
 		currentTimings = animationTimingMap.get(id);
 		totalFramesRemaining = sumCounts(currentTimings);
 		currentFrameIndex = 0;
@@ -51,7 +63,49 @@ public class Model {
 		return totalFramesRemaining;
 	}
 
+	// TODO: Consider making this auto-reset on the current animation if the number of frames is exceeded
+	public int advanceFrame() {
+		countRemainingForCurrentFrame--;
+		totalFramesRemaining--;
+
+		if (countRemainingForCurrentFrame == 0) {
+			currentFrameIndex++;
+			countRemainingForCurrentFrame = currentTimings.get(currentFrameIndex);
+		}
+
+		final Frame currentFrame = currentFrames.get(direction).get(currentFrameIndex);
+
+		currentSprite = currentFrame.getImage();
+		setHardpointPositions(currentFrame, hardpoints);
+
+		return totalFramesRemaining;
+	}
+
+	// TODO: This can probably be optimized but this is fine for now
+	public int advanceFrames(final int count) {
+		for (int i = 0; i < count-1; i++)
+			advanceFrame();
+		return advanceFrame();
+	}
+
+	public IHardpointPosition getHardpointPosition(int id) {
+		return hardpoints.get(id);
+	}
+
 	/* Helper Methods */
+	private void setHardpointPositions(final Frame frame, List<Hardpoint> hardpoints) {
+		for (int i = 0; i < hardpoints.size(); i++) {
+			final IHardpointPosition newPos = frame.getHardpointPositions().get(i);
+			final Hardpoint current = hardpoints.get(i);
+
+			current.setX(newPos.getX());
+			current.setY(newPos.getY());
+			current.setRotation(newPos.getRotation());
+		}
+	}
+
+	// FIXME: Most of the logic for building these frame timing lists should be abstracted
+	// FIXME: Initial timing lists can be done per ModelData (instead of per model)
 	private Map<Integer, List<Integer>> buildTimingMap(final Map<Integer, Animation> animations) {
 		final Map<Integer, List<Integer>> timingMap = new HashMap<>();
 
