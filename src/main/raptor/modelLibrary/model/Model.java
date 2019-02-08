@@ -31,7 +31,7 @@ public class Model {
 		hardpoints = new ArrayList<>(base.getHardpointCount());
 
 		for (int i = 0; i < base.getHardpointCount(); i++)
-			hardpoints.add(new Hardpoint(0, 0, 0));
+			hardpoints.add(new Hardpoint(0, 0, 0, position));
 
 		setHardpointPositions(base.getDefaultFrame(), hardpoints);
 		currentSprite = base.getDefaultFrame().getImage();
