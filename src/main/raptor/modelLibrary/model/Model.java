@@ -29,13 +29,13 @@ public class Model {
 	public Model(final ModelData base, final IPointReader position, final int initialDirection) {
 		animations = base.getAnimations();
 		hardpoints = new ArrayList<>(base.getHardpointCount());
+		this.position = position;
 
 		for (int i = 0; i < base.getHardpointCount(); i++)
-			hardpoints.add(new Hardpoint(0, 0, 0, position));
+			hardpoints.add(new Hardpoint(0, 0, 0, this.position));
 
 		setHardpointPositions(base.getDefaultFrame(), hardpoints);
 		currentSprite = base.getDefaultFrame().getImage();
-		this.position = position;
 		direction = initialDirection;
 
 		animationTimingMap = buildTimingMap(animations);
