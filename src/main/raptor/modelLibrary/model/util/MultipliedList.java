@@ -26,6 +26,7 @@ public class MultipliedList<T> extends AbstractList<T> {
 				return provider.get(actualIndex);
 
 			working -= i;
+			actualIndex++;
 		}
 
 		throw new IndexOutOfBoundsException();
