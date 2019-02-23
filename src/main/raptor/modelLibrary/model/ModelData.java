@@ -1,29 +1,44 @@
 package raptor.modelLibrary.model;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.AbstractList;
 
-public class ModelData {
-	private final Map<Integer, Animation> animations;
-	private final Frame defaultFrame;
-	private final int hardpointCount;
+import raptor.modelLibrary.model.animation.Animation;
+import raptor.modelLibrary.model.animation.frame.Frame;
 
-	public ModelData(final Map<Integer, Animation> animations, final Frame defaultFrame) {
-		this.animations = Collections.unmodifiableMap(animations);
-		this.defaultFrame = defaultFrame;
-		// FIXME: this looks really bad
-		this.hardpointCount = animations.entrySet().iterator().next().getValue().getFrames().get(0).get(0).getHardpointPositions().size();
+public class ModelData<T extends Frame> {
+	private final AbstractList<Animation<T>> animations;
+	private final int defaultAnimation;
+	private final int directionsCount;
+	private final int width;
+	private final int height;
+
+	public ModelData(final AbstractList<Animation<T>> animations,
+			final int defaultAnimation, final int directionsCount,
+			final int width, final int height) {
+		this.animations = animations;
+		this.defaultAnimation = defaultAnimation;
+		this.directionsCount = directionsCount;
+		this.width = width;
+		this.height = height;
 	}
 
-	public Map<Integer, Animation> getAnimations() {
+	public AbstractList<Animation<T>> getAnimations() {
 		return animations;
 	}
 
-	public Frame getDefaultFrame() {
-		return defaultFrame;
+	public int getDefaultAnimation() {
+		return defaultAnimation;
 	}
 
-	public int getHardpointCount() {
-		return hardpointCount;
+	public int getDirectionsCount() {
+		return directionsCount;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
 	}
 }

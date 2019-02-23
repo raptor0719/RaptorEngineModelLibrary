@@ -7,6 +7,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import raptor.modelLibrary.model.ModelData;
+import raptor.modelLibrary.model.animation.frame.Frame;
+import raptor.modelLibrary.model.animation.frame.WiredFrame;
 import raptor.modelLibrary.model.util.DimensionalList;
 import raptor.modelLibrary.model.util.ListRotation;
 import raptor.modelLibrary.model.util.MultipliedList;
@@ -60,7 +63,8 @@ public class IntegrationTest {
 				dimList1.setDimension(3);
 			if (i == 10)
 				dimList1.setDimension(1);
-			result[i] = rot.advance();
+			result[i] = rot.getCurrent();
+			rot.advance();
 		}
 
 		final int[] expected = {0, 0, 0, 0,
@@ -72,12 +76,61 @@ public class IntegrationTest {
 		Assert.assertArrayEquals(expected, result);
 	}
 
+	@Test
+	public void test2() {
+		final AbstractList<Integer> numbs0 = createList(0, 1, 2, 3);
+		final AbstractList<Integer> numbs1 = createList(10, 11, 12, 13);
+		final AbstractList<Integer> numbs2 = createList(20, 21, 22, 23);
+		final AbstractList<Integer> numbs3 = createList(30, 31, 32, 33);
+
+		final List<AbstractList<Integer>> lists = new ArrayList<>();
+		lists.add(numbs0);
+		lists.add(numbs1);
+		lists.add(numbs2);
+		lists.add(numbs3);
+
+		final AbstractList<AbstractList<Integer>> casted = (AbstractList<AbstractList<Integer>>) lists;
+
+		final DimensionalList<Integer> dims = new DimensionalList<Integer>(casted);
+
+		final AbstractList<Integer> timings = createList(5, 3, 1, 4);
+		final MultipliedList<Integer> multi = new MultipliedList<>(dims, timings);
+
+		final ListRotation<Integer> rot = new ListRotation<>(multi);
+
+		final int[] result = new int[15];
+		for (int i = 0; i < result.length; i++) {
+			if (i == 4)
+				dims.setDimension(2);
+			if (i == 7)
+				dims.setDimension(3);
+			if (i == 10)
+				dims.setDimension(1);
+			result[i] = rot.getCurrent();
+			rot.advance();
+		}
+
+		final int[] expected = {0, 0, 0, 0,
+								20, 21, 21,
+								31, 32, 33,
+								13, 13, 13,
+								10, 10};
+
+		Assert.assertArrayEquals(expected, result);
+	}
+
+	@Test
+	public void castTest() {
+		final ModelData<? extends Frame> init = new ModelData<WiredFrame>(null, 0, 0, 0, 0);
+		final ModelData<Frame> data = (ModelData<Frame>) init;
+	}
+
 	/* HELPER METHODS */
 
-	private AbstractList<Integer> createList(final Integer... ints) {
-		final List<Integer> newList = new ArrayList<>(ints.length);
+	private AbstractList<Integer> createList(final Integer... ts) {
+		final List<Integer> newList = new ArrayList<>(ts.length);
 
-		for (final Integer i : ints)
+		for (final Integer i : ts)
 			newList.add(i);
 
 		return (AbstractList<Integer>) newList;

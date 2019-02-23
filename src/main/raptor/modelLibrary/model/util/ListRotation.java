@@ -24,16 +24,16 @@ public class ListRotation<T> {
 		this.setProvider(newProvider, false);
 	}
 
-	public T advance(final int count) {
-		final T current = provider.get(currentIndex);
-
+	public void advance(final int count) {
 		currentIndex = (currentIndex + count) % provider.size();
-
-		return current;
 	}
 
-	public T advance() {
-		return this.advance(1);
+	public void advance() {
+		this.advance(1);
+	}
+
+	public T getCurrent() {
+		return provider.get(currentIndex);
 	}
 
 	public int size() {
