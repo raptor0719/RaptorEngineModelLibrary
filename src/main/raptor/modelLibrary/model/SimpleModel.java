@@ -12,10 +12,13 @@ import raptor.modelLibrary.model.util.ListRotation;
 import raptor.modelLibrary.model.util.MultipliedList;
 import raptor.modelLibrary.model.util.TimingList;
 import raptor.modelLibrary.model.util.point.IRotatedPoint;
+import raptor.modelLibrary.model.util.point.PointTranslator;
+import raptor.modelLibrary.model.util.point.TranslatedPoint;
 
 public class SimpleModel {
 	private final ModelData<Frame> data;
 	private final IRotatedPoint positionReference;
+	private final IRotatedPoint modelOrigin;
 
 	// Animation Infrastructure
 	private final List<DimensionalList<Frame>> animationFrames;
@@ -24,7 +27,7 @@ public class SimpleModel {
 	private int currentAnimation;
 	private int currentDimension;
 
-	public SimpleModel(final ModelData<? extends Frame> initData, final IRotatedPoint positionReference) {
+	public SimpleModel(final ModelData<? extends Frame> initData, final IRotatedPoint positionReference, final PositionOriginType positionOriginType) {
 		// FIXME ModelData is read-only by design, casting to frame should be done elsewhere
 		data = (ModelData<Frame>) initData;
 		animationFrames = buildFrames(data);
@@ -34,6 +37,12 @@ public class SimpleModel {
 		currentDimension = 0;
 
 		this.positionReference = positionReference;
+
+		this.modelOrigin = new TranslatedPoint(positionReference, getPointTranslator(initData.getWidth(), initData.getHeight(), positionOriginType));
+	}
+
+	public SimpleModel(final ModelData<? extends Frame> initData, final IRotatedPoint positionReference) {
+		this(initData, positionReference, PositionOriginType.BOTTOM_CENTER);
 	}
 
 	public int setAnimation(final int animation) {
@@ -71,6 +80,10 @@ public class SimpleModel {
 		return positionReference;
 	}
 
+	protected IRotatedPoint getModelOrigin() {
+		return modelOrigin;
+	}
+
 	public int getWidth() {
 		return data.getWidth();
 	}
@@ -105,5 +118,12 @@ public class SimpleModel {
 
 	private AbstractList<Integer> buildTimingList(final int[] timings) {
 		return new TimingList(timings);
+	}
+
+	private PointTranslator getPointTranslator(final int width, final int height, final PositionOriginType positionOriginType) {
+		if (positionOriginType.equals(PositionOriginType.BOTTOM_CENTER))
+			return new PointTranslator(- (int) (width * 0.5), - height);
+		else // if (positionOriginType.equals(PositionOriginType.CENTER))
+			return new PointTranslator(- (int) (width * 0.5), - (int) (height * 0.5));
 	}
 }

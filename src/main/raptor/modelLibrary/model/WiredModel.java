@@ -65,9 +65,9 @@ public class WiredModel extends SimpleModel {
 			final Point point = hardpoints[i];
 			final IRotatedPoint pos = positions[i];
 
-			point.setX(pos.getX() + this.getPosition().getX());
-			point.setY(pos.getY() + this.getPosition().getY());
-			point.setRotation(pos.getRotation() + this.getPosition().getRotation());
+			point.setX(pos.getX() + this.getModelOrigin().getX());
+			point.setY(pos.getY() + this.getModelOrigin().getY());
+			point.setRotation(pos.getRotation() + this.getModelOrigin().getRotation());
 
 			//System.out.println("For point " + i + " x=" + point.getX() + " y=" + point.getY());
 		}
