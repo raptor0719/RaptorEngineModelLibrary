@@ -2,34 +2,28 @@ package raptor.modelLibrary.temp;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import raptor.modelLibrary.api.Model;
-import raptor.modelLibrary.model.animation.frame.Frame;
-import raptor.modelLibrary.model.animation.frame.Sprite;
+import raptor.modelLibrary.model.animation.frame.WiredFrame;
 import raptor.modelLibrary.model.util.DimensionalList;
 import raptor.modelLibrary.model.util.ListRotation;
 import raptor.modelLibrary.model.util.MultipliedList;
 import raptor.modelLibrary.model.util.TimingList;
 import raptor.modelLibrary.model.util.point.IRotatedPoint;
-import raptor.modelLibrary.model.util.point.Point;
 
 public class ConcreteModel implements Model {
-	private final AttachmentManager attachments;
-
 	// Animation Infrastructure
-	private final List<DimensionalList<Frame>> animationFrames;
-	private final List<MultipliedList<Frame>> timedAnimations;
-	private final ListRotation<Frame> animator;
+	private final List<DimensionalList<WiredFrame>> animationFrames;
+	private final List<MultipliedList<WiredFrame>> timedAnimations;
+	private final ListRotation<WiredFrame> animator;
 	private int currentAnimation;
 	private int currentDimension;
 
-	protected ConcreteModel(final AnimationSet animations) {
-		attachments = new AttachmentManager(animations.getHardpointCount());
+	protected ConcreteModel(final AbstractList<Animation> animations, final AbstractList<String> hardpointNames) {
 		animationFrames = buildFrames(animations);
 		timedAnimations = buildTiming(animations, animationFrames);
-		animator = new ListRotation<Frame>(null);
+		animator = new ListRotation<WiredFrame>(null);
 		currentAnimation = -1;
 		currentDimension = 0;
 	}
@@ -40,25 +34,39 @@ public class ConcreteModel implements Model {
 	}
 
 	@Override
-	public int setAnimation(final int id) {
-		if (id < 0 || id >= timedAnimations.size())
+	public int setAnimation(final int animationId) {
+		if (animationId < 0 || animationId >= timedAnimations.size())
 			return -1;
 
-		animationFrames.get(id).setDimension(currentDimension);
-		animator.setProvider(timedAnimations.get(id));
-		currentAnimation = id;
+		animationFrames.get(animationId).setDimension(currentDimension);
+		animator.setProvider(timedAnimations.get(animationId));
+		currentAnimation = animationId;
 
-		return animator.size();
-	}
-
-	public int advanceFrame(final int frameCount) {
-		animator.advance(frameCount);
 		return animator.size();
 	}
 
 	@Override
+	public int setAnimation(final String animationName) {
+		return -1;
+	}
+
+	@Override
+	public void setAnimationFrameCount(final int animationId, final int frameCount) {
+	}
+
+	@Override
+	public void setAnimationFrameCount(final String animationName, final int frameCount) {
+	}
+
+	@Override
 	public int advanceFrame() {
-		return advanceFrame(1);
+		return advanceFrames(1);
+	}
+
+	@Override
+	public int advanceFrames(final int frameCount) {
+		animator.advance(frameCount);
+		return animator.size();
 	}
 
 	@Override
@@ -67,59 +75,64 @@ public class ConcreteModel implements Model {
 	}
 
 	@Override
-	public void attachModel(Model model, int hardpointId, int offX, int offY, int offRot) {
-		// TODO Auto-generated method stub
-
+	public void setSprite(final int hardpointId, final DimensionalSprite sprite) {
 	}
 
 	@Override
-	public void removeModel(int hardpointId) {
-		// TODO Auto-generated method stub
-
+	public void setSprite(final String hardpointName, final DimensionalSprite sprite) {
 	}
 
 	@Override
-	public IRotatedPoint getHardpointPosition(int id) {
-		// TODO Auto-generated method stub
+	public void unsetSprite(int hardpointId) {
+	}
+
+	@Override
+	public void unsetSprite(String hardpointName) {
+	}
+
+	@Override
+	public IRotatedPoint getHardpointPosition(final int hardpointId) {
 		return null;
 	}
 
 	@Override
-	public void setModel(Model model, int hardpointId) {
-		// TODO Auto-generated method stub
-
+	public IRotatedPoint getHardpointPosition(final String hardpointName) {
+		return null;
 	}
 
 	@Override
-	public void unsetModel(int hardpointId) {
-		// TODO Auto-generated method stub
-
+	public DimensionalSprite getAttachedSprite(final int hardpointId) {
+		return null;
 	}
 
 	@Override
-	public Sprite getModelSprite() {
-		// TODO Auto-generated method stub
+	public DimensionalSprite getAttachedSprite(final String hardpointName) {
+		return null;
+	}
+
+	@Override
+	public ModelDescriptor getDescriptor() {
 		return null;
 	}
 
 	/* HELPER METHODS */
-	private List<DimensionalList<Frame>> buildFrames(final AnimationSet animations) {
-		final List<DimensionalList<Frame>> frames = new ArrayList<>();
+	private List<DimensionalList<WiredFrame>> buildFrames(final AnimationSet animations) {
+		final List<DimensionalList<WiredFrame>> frames = new ArrayList<>();
 
 		for (final Animation a : animations.getAnimations()) {
-			frames.add(new DimensionalList<Frame>(a.getFrames()));
+			frames.add(new DimensionalList<WiredFrame>(a.getFrames()));
 		}
 
 		return frames;
 	}
 
-	private List<MultipliedList<Frame>> buildTiming(final AnimationSet data, final List<DimensionalList<Frame>> frames) {
-		final List<MultipliedList<Frame>> timings = new ArrayList<>();
+	private List<MultipliedList<WiredFrame>> buildTiming(final AnimationSet data, final List<DimensionalList<WiredFrame>> frames) {
+		final List<MultipliedList<WiredFrame>> timings = new ArrayList<>();
 
 		for (int i = 0; i < frames.size(); i++) {
 			final Animation animation = data.getAnimations().get(i);
 
-			timings.add(new MultipliedList<Frame>(frames.get(i), buildTimingList(animation.getTimings())));
+			timings.add(new MultipliedList<WiredFrame>(frames.get(i), buildTimingList(animation.getTimings())));
 		}
 
 		return timings;
@@ -127,34 +140,5 @@ public class ConcreteModel implements Model {
 
 	private AbstractList<Integer> buildTimingList(final int[] timings) {
 		return new TimingList(timings);
-	}
-
-	/* HELPER CLASSES */
-	private class AttachmentManager {
-		private final boolean[] hasAttached;
-		private final Attachment[] attachments;
-
-		public AttachmentManager(final int hardpointCount) {
-			hasAttached = new boolean[hardpointCount];
-			attachments = new Attachment[hardpointCount];
-
-			Arrays.fill(hasAttached, false);
-			for (int i = 0; i < attachments.length; i++)
-				attachments[i] = new Attachment();
-		}
-
-		public boolean hasAttachment(final int hardpointId) {
-			return hardpointId >= 0 && hardpointId < hasAttached.length && hasAttached[hardpointId];
-		}
-
-		private class Attachment {
-			public final Point offset;
-			public final Model model;
-
-			public Attachment() {
-				offset = null;
-				model = null;
-			}
-		}
 	}
 }

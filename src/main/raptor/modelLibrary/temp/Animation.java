@@ -3,22 +3,28 @@ package raptor.modelLibrary.temp;
 import java.util.AbstractList;
 
 import raptor.modelLibrary.model.FrameTiming;
-import raptor.modelLibrary.model.animation.frame.Frame;
+import raptor.modelLibrary.model.animation.frame.WiredFrame;
 
 public class Animation {
 	private static final AnimationTimingCalculator animTiming = new AnimationTimingCalculator();
 
-	private final AbstractList<AbstractList<Frame>> frames;
+	private final String name;
+	private final AbstractList<AbstractList<WiredFrame>> frames;
 	private final AbstractList<FrameTiming> timings;
 	private final int defaultFrameCount;
 
-	public Animation(final AbstractList<AbstractList<Frame>> frames, final AbstractList<FrameTiming> timings, final int defaultFrameCount) {
+	public Animation(final String name, final AbstractList<AbstractList<WiredFrame>> frames, final AbstractList<FrameTiming> timings, final int defaultFrameCount) {
+		this.name = name;
 		this.frames = frames;
 		this.timings = timings;
 		this.defaultFrameCount = defaultFrameCount;
 	}
 
-	public AbstractList<AbstractList<Frame>> getFrames() {
+	public String getName() {
+		return name;
+	}
+
+	public AbstractList<AbstractList<WiredFrame>> getFrames() {
 		return frames;
 	}
 
